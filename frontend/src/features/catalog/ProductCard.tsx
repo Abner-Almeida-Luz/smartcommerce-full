@@ -5,6 +5,7 @@ import { useAuthStore } from '@/features/auth/authStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ProdutoResponse } from '@/api/types'
+import { buttonVariants } from '@/components/ui/button'
 
 export function ProductCard({ produto }: { produto: ProdutoResponse }) {
   const token = useAuthStore((s) => s.token)
@@ -22,7 +23,7 @@ export function ProductCard({ produto }: { produto: ProdutoResponse }) {
         <p className="text-sm text-muted-foreground">Estoque: {produto.estoque}</p>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button asChild variant="outline" size="sm"><Link to={`/produtos/${produto.id}`}>Detalhes</Link></Button>
+        <Link to={`/produtos/${produto.id}`} className={buttonVariants({ variant: 'outline', size: 'sm' })}>Detalhes</Link>
         <Button size="sm" disabled={!token || produto.estoque === 0 || mutation.isPending} onClick={() => mutation.mutate()}>
           {!token ? 'Entre para comprar' : produto.estoque === 0 ? 'Sem estoque' : 'Adicionar'}
         </Button>

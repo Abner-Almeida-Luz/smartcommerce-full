@@ -17,7 +17,7 @@ export default function CheckoutPage() {
   const form = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { enderecoEntrega: '' } })
   const mutation = useMutation({
     mutationFn: criarPedido,
-    onSuccess: (pedido) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['carrinho'] })
       qc.invalidateQueries({ queryKey: ['pedidos'] })
       navigate(`/meus-pedidos`)

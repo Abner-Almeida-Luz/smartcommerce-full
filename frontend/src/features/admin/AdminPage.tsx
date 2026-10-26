@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listarProdutos, criarProduto, desativarProduto } from '@/api/produtos'
-import { meusPedidos, mudarStatus } from '@/api/pedidos'
+import { mudarStatus } from '@/api/pedidos'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { StatusPedido } from '@/api/types'
+import type { Page, PedidoResponse } from '@/api/types'
 import { apiClient } from '@/api/client'
+
 
 export default function AdminPage() {
   const qc = useQueryClient()
@@ -16,7 +18,6 @@ export default function AdminPage() {
   const [estoque, setEstoque] = useState('')
 
   const { data: produtos } = useQuery({ queryKey: ['produtos', 'admin'], queryFn: () => listarProdutos(0, 50) })
-  const { data: pedidos } = useQuery({ queryKey: ['admin', 'pedidos'], queryFn: () => meusPedidos(0, 50) })
 
   const criar = useMutation({
     mutationFn: () => criarProduto({ nome, preco: Number(preco), estoque: Number(estoque) }),
@@ -34,14 +35,16 @@ export default function AdminPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'pedidos'] }),
   })
 
-  const { data: pedidos } = useQuery({
+const { data: pedidos } = useQuery<Page<PedidoResponse>>({
   queryKey: ['admin', 'pedidos'],
   queryFn: async () => {
     const { data } = await apiClient.get('/api/v1/pedidos/admin', { params: { page: 0, size: 50 } })
     return data
   },
-    })
+})
 
+
+    
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Admin</h1>

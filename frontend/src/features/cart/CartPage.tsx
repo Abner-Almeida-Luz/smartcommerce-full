@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { obterCarrinho, removerItem, limparCarrinho } from '@/api/carrinho'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { buttonVariants } from '@/components/ui/button'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -21,7 +22,7 @@ export default function CartPage() {
   if (!data || data.itens.length === 0) return (
     <div className="text-center py-12">
       <p className="text-muted-foreground mb-4">Carrinho vazio</p>
-      <Button asChild><Link to="/">Ver produtos</Link></Button>
+     <Link to="/" className={buttonVariants()}>Ver produtos</Link>
     </div>
   )
 
