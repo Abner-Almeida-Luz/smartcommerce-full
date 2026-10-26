@@ -1,6 +1,5 @@
 package com.smartcommerce.backend.shared;
 
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,11 +30,6 @@ public class SecurityBeansConfig {
 
     public SecurityBeansConfig(JwtAuthenticationFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
-    }
-
-    @PostConstruct
-    void logCors() {
-        System.out.println(">>> CORS_ALLOWED_ORIGINS loaded = [" + allowedOrigins + "]");
     }
 
     @Bean
