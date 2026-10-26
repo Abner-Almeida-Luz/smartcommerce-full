@@ -1,5 +1,6 @@
 package com.smartcommerce.backend.shared;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -20,8 +26,16 @@ public class SecurityBeansConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
+
     public SecurityBeansConfig(JwtAuthenticationFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
+    }
+
+    @PostConstruct
+    void logCors() {
+        System.out.println(">>> CORS_ALLOWED_ORIGINS loaded = [" + allowedOrigins + "]");
     }
 
     @Bean
@@ -47,12 +61,14 @@ public class SecurityBeansConfig {
                         // escrita de produtos: ADMIN
                         .requestMatchers("/api/v1/produtos/**").hasRole("ADMIN")
 
-                        // tudo mais: autenticado
+                        // swagger
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
+
+                        // tudo mais: autenticado
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(e -> e
@@ -74,17 +90,17 @@ public class SecurityBeansConfig {
         return http.build();
     }
 
-    @Value("${app.cors.allowed-origins}")
-    private String allowedOrigins;
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        var config = new org.springframework.web.cors.CorsConfiguration();
-        config.setAllowedOrigins(java.util.Arrays.asList(allowedOrigins.split(",")));
-        config.setAllowedMethods(java.util.List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        config.setAllowedHeaders(java.util.List.of("*"));
+        var config = new CorsConfiguration();
+        // setAllowedOriginPatterns + trim para tolerar espaços/quebras na env var
+        config.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.trim().split(",")));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        config.setMaxAge(3600L);
+
+        var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
